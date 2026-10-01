@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>سَكِينة — تطبيق إسلامي</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--soft:#f4f8f6;--line:#e2ebe7;--ink:#1e3a34;--mut:#6b817a;--pri:#3e7c6a;--gold:#b58e4b}
+*{box-sizing:border-box;margin:0}
+body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--ink);line-height:1.8}
+header{position:sticky;top:0;background:#fffffff2;border-bottom:1px solid var(--line);z-index:5;backdrop-filter:blur(6px)}
+.bar{max-width:880px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:10px 16px}
+.logo{font-family:Amiri,serif;font-size:26px;font-weight:700;color:var(--pri)}
+nav{max-width:880px;margin:auto;display:flex;gap:4px;overflow-x:auto;padding:0 12px 8px}
+nav button{flex:none;border:0;background:none;font:inherit;color:var(--mut);padding:6px 14px;border-radius:99px;cursor:pointer}
+nav button.on{background:var(--soft);color:var(--pri);font-weight:600}
+main{max-width:880px;margin:auto;padding:20px 16px 60px}
+h2{font-size:20px;margin-bottom:14px;font-weight:600}
+.card{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;background:#fff}
+.soft{background:var(--soft);border:0}
+button.b,.b{font:inherit;border:0;background:var(--pri);color:#fff;padding:8px 18px;border-radius:10px;cursor:pointer}
+.b.g{background:var(--soft);color:var(--pri)} .b.r{background:#fbeeee;color:#a34}
+input,textarea{font:inherit;border:1px solid var(--line);border-radius:10px;padding:8px 12px;width:100%;color:var(--ink)}
+textarea{min-height:160px;direction:ltr;font-family:monospace;font-size:13px}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}.row>.b{flex:none}
+.mut{color:var(--mut);font-size:14px}
+.next{text-align:center;padding:28px 16px}
+.next .t{font-size:44px;font-weight:600;color:var(--pri);letter-spacing:1px;direction:ltr}
+.pt{display:flex;justify-content:space-between;padding:12px 4px;border-bottom:1px solid var(--line)}
+.pt.on{color:var(--pri);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.s{border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;text-align:right;font:inherit;background:#fff;color:var(--ink)}
+.s:hover{background:var(--soft)} .s small{display:block;color:var(--mut)}
+.q{font-family:Amiri,serif;font-size:27px;line-height:2.4;text-align:justify}
+.q .a{cursor:pointer;border-radius:6px}.q .a.rd{color:var(--pri)}
+.q .n{font-family:'IBM Plex Sans Arabic';font-size:13px;color:var(--gold);padding:0 4px}
+.z{font-family:Amiri,serif;font-size:23px;line-height:2.1}
+.z+.row{margin-top:10px}.done{opacity:.45}
+.rk{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.rk i{font-style:normal;width:32px;height:32px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-weight:600;color:var(--pri)}
+.rk.p1 i{background:#f4e8d0;color:var(--gold)} .rk.me{border-color:var(--pri)}
+.rk b{flex:1;font-weight:500}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.ban{background:#f4e8d0;border-radius:12px;padding:10px 14px;margin-bottom:14px;color:#6b4e1c}
+.chk{display:flex;gap:10px;align-items:center}.chk input{width:20px;height:20px}
+.chk span{flex:1}.chk .x{background:none;border:0;color:var(--mut);cursor:pointer;font-size:18px}
+.cut{text-decoration:line-through;color:var(--mut)}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar"><div class="logo">سَكِينة</div><div id="auth"></div></div>
+  <nav id="nav"></nav>
+</header>
+<main id="app"></main>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import {getFirestore,doc,getDoc,setDoc,deleteDoc,increment,collection,query,orderBy,limit,getDocs} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const ADMINS=["PUT_YOUR_EMAIL_HERE@gmail.com"]; // ← ضع إيميل الأدمن هنا
+const app=initializeApp({apiKey:"AIzaSyBy9uT7H43jEJ3jru0wWm4eg-SFo1Ov_xc",authDomain:"muslim-ccc21.firebaseapp.com",projectId:"muslim-ccc21",storageBucket:"muslim-ccc21.firebasestorage.app",messagingSenderId:"360397838496",appId:"1:360397838496:web:5ebd85081930aa8b19d1c5"});
+const auth=getAuth(app),db=getFirestore(app);
+const $=s=>document.querySelector(s), A=$('#app');
+const today=()=>new Date().toISOString().slice(0,10);
+const ls=(k,d)=>{try{return JSON.parse(localStorage[k])??d}catch{return d}};
+const sv=(k,v)=>localStorage[k]=JSON.stringify(v);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+let user=null,me={total:0,today:0},cfg={},timer;
+const isAdmin=()=>user&&ADMINS.includes(user.email);
+
+const KURSI="اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ";
+const COMMON=[
+ {t:"أَعُوذُ بِاللهِ مِنَ الشَّيْطَانِ الرَّجِيمِ — "+KURSI,n:1},
+ {t:"قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ",n:3},
+ {t:"قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ مِن شَرِّ مَا خَلَقَ ۝ وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝ وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝ وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ",n:3},
+ {t:"قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ مَلِكِ النَّاسِ ۝ إِلَٰهِ النَّاسِ ۝ مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝ مِنَ الْجِنَّةِ وَالنَّاسِ",n:3},
+ {t:"بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ",n:3},
+ {t:"رَضِيتُ بِاللَّهِ رَبًّا، وَبِالْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ ﷺ نَبِيًّا",n:3},
+ {t:"حَسْبِيَ اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ",n:7},
+ {t:"سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",n:100},
+ {t:"لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",n:10},
+ {t:"أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ",n:100},
+ {t:"اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَىٰ نَبِيِّنَا مُحَمَّدٍ",n:10}];
+const AZKAR={
+ morning:[...COMMON.slice(0,3),{t:"أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ",n:1},{t:"اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ",n:1},...COMMON.slice(3)],
+ evening:[...COMMON.slice(0,3),{t:"أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ",n:1},{t:"اللَّهُمَّ بِكَ أَمْسَيْنَا، وَبِكَ أَصْبَحْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ الْمَصِيرُ",n:1},...COMMON.slice(3)]};
+
+/* ---------- Auth ---------- */
+function drawAuth(){
+  $('#auth').innerHTML=user?`<span class="mut">${esc(user.displayName||'')}</span> <button class="b g" id="out">خروج</button>`:`<button class="b" id="in">دخول بحساب جوجل</button>`;
+  ($('#in')||{}).onclick=()=>signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>alert('تعذّر الدخول: '+e.code));
+  ($('#out')||{}).onclick=()=>signOut(auth);
+}
+onAuthStateChanged(auth,async u=>{
+  user=u;drawAuth();
+  if(u){const s=await getDoc(doc(db,'users',u.uid));me=s.exists()?s.data():{total:0,today:0};if(me.todayKey!==today())me.today=0}
+  buildNav();route();
+});
+
+/* ---------- Score (قراءة القرآن) ---------- */
+let pend=0,tm;
+function addScore(){
+  if(!user)return;pend++;me.total=(me.total||0)+1;me.today=(me.today||0)+1;
+  clearTimeout(tm);tm=setTimeout(async()=>{const k=pend;pend=0;
+    try{await setDoc(doc(db,'users',user.uid),{name:user.displayName||'مجهول',photo:user.photoURL||'',total:increment(k),today:me.today,todayKey:today()},{merge:true})}catch(e){console.error(e)}},1500);
+}
+
+/* ---------- Router ---------- */
+const PAGES={quran:'القرآن',prayer:'الصلاة',azkar:'الأذكار',tasks:'المهام',board:'المنافسة',admin:'لوحة التحكم'};
+function buildNav(){
+  $('#nav').innerHTML=Object.entries(PAGES).filter(([k])=>k!=='admin'||isAdmin()).map(([k,v])=>`<button data-p="${k}">${v}</button>`).join('');
+  document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>location.hash=b.dataset.p);
+}
+async function route(){
+  clearInterval(timer);
+  const p=location.hash.slice(1)||'prayer';
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
+  if(!cfg.loaded){try{const [a,z]=await Promise.all([getDoc(doc(db,'config','app')),getDoc(doc(db,'config','azkar'))]);cfg={loaded:1,...(a.data()||{}),azkar:z.exists()?z.data():null}}catch{cfg={loaded:1}}}
+  A.innerHTML=(cfg.announcement&&p!=='admin'?`<div class="ban">${esc(cfg.announcement)}</div>`:'');
+  const box=document.createElement('div');A.append(box);
+  ({quran,prayer,azkar,tasks,board,admin}[p]||prayer)(box);
+}
+addEventListener('hashchange',route);
+
+/* ---------- القرآن ---------- */
+async function quran(el){
+  el.innerHTML='<h2>المصحف الكامل</h2><div class="mut">جارٍ التحميل…</div>';
+  try{
+    let list=ls('surahs',null);
+    if(!list){list=(await (await fetch('https://api.alquran.cloud/v1/surah')).json()).data.map(s=>({n:s.number,name:s.name,c:s.numberOfAyahs}));sv('surahs',list)}
+    el.innerHTML=`<h2>المصحف الكامل</h2><p class="mut" style="margin-bottom:12px">اضغط على الآية بعد قراءتها لتُحتسب في رصيدك${user?'':' (سجّل دخولك لتظهر في المنافسة)'}.</p><div class="grid">${list.map(s=>`<button class="s" data-n="${s.n}">${s.n}. ${s.name}<small>${s.c} آية</small></button>`).join('')}</div>`;
+    el.querySelectorAll('.s').forEach(b=>b.onclick=()=>surah(el,+b.dataset.n,list));
+  }catch{el.innerHTML='<div class="card">تعذّر تحميل المصحف، تأكد من الاتصال بالإنترنت.</div>'}
+}
+async function surah(el,n,list){
+  el.innerHTML='<div class="mut">جارٍ التحميل…</div>';
+  const d=(await (await fetch(`https://api.alquran.cloud/v1/surah/${n}/quran-uthmani`)).json()).data;
+  const rd=new Set(ls('rd'+n,[]));
+  el.innerHTML=`<div class="row" style="margin-bottom:14px"><button class="b g" id="bk">‹ السور</button><h2 style="margin:0;flex:2;text-align:center">${d.name}</h2></div><div class="card q">${d.ayahs.map(a=>{let t=a.text;if(n!==1&&a.numberInSurah===1)t=t.replace(/^بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ\s*/,'');return `<span class="a ${rd.has(a.numberInSurah)?'rd':''}" data-i="${a.numberInSurah}">${t}<span class="n">﴿${a.numberInSurah}﴾</span></span> `}).join('')}</div>`;
+  $('#bk').onclick=()=>quran(el);
+  el.querySelectorAll('.a').forEach(s=>s.onclick=()=>{const i=+s.dataset.i;if(rd.has(i))return;rd.add(i);sv('rd'+n,[...rd]);s.classList.add('rd');addScore()});
+}
+
+/* ---------- الصلاة ---------- */
+async function prayer(el){
+  const loc=ls('loc',{city:'Cairo',country:'Egypt'});
+  el.innerHTML=`<h2>مواقيت الصلاة</h2><div class="row card soft"><input id="ci" value="${esc(loc.city)}" placeholder="المدينة (بالإنجليزية)"><input id="co" value="${esc(loc.country)}" placeholder="الدولة"><button class="b" id="go">تحديث</button></div><div id="pt" class="mut">جارٍ التحميل…</div>`;
+  $('#go').onclick=()=>{sv('loc',{city:$('#ci').value,country:$('#co').value});prayer(el)};
+  try{
+    const r=await (await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(loc.city)}&country=${encodeURIComponent(loc.country)}&method=5`)).json();
+    if(r.code!==200)throw 0;
+    const T=r.data.timings,names={Fajr:'الفجر',Sunrise:'الشروق',Dhuhr:'الظهر',Asr:'العصر',Maghrib:'المغرب',Isha:'العشاء'};
+    const f12=t=>{let [h,m]=t.split(' ')[0].split(':').map(Number);return `${h%12||12}:${String(m).padStart(2,'0')} ${h<12?'ص':'م'}`};
+    const at=k=>{const [h,m]=T[k].split(' ')[0].split(':').map(Number);const d=new Date();d.setHours(h,m,0,0);return d};
+    const tick=()=>{
+      const now=new Date();let k=Object.keys(names).find(x=>at(x)>now),d;
+      if(k)d=at(k);else{k='Fajr';d=at(k);d.setDate(d.getDate()+1)}
+      const s=Math.floor((d-now)/1000),p=n=>String(n).padStart(2,'0');
+      $('#pt').innerHTML=`<div class="card soft next"><div class="mut">الصلاة القادمة: ${names[k]}</div><div class="t">${p(s/3600|0)}:${p(s%3600/60|0)}:${p(s%60)}</div></div><div class="card">${Object.keys(names).map(x=>`<div class="pt ${x===k?'on':''}"><span>${names[x]}</span><span>${f12(T[x])}</span></div>`).join('')}</div><p class="mut">${r.data.date.hijri.day} ${r.data.date.hijri.month.ar} ${r.data.date.hijri.year} هـ</p>`};
+    tick();timer=setInterval(tick,1000);
+  }catch{$('#pt').innerHTML='<div class="card">تعذّر جلب المواقيت. تأكد من اسم المدينة والدولة بالإنجليزية.</div>'}
+}
+
+/* ---------- الأذكار ---------- */
+function azkar(el,kind='morning'){
+  const list=(cfg.azkar&&cfg.azkar[kind])||AZKAR[kind],k='az'+kind+today(),left=ls(k,{});
+  el.innerHTML=`<h2>الأذكار</h2><div class="tabs"><button class="b ${kind=='morning'?'':'g'}" data-k="morning">أذكار الصباح</button><button class="b ${kind=='evening'?'':'g'}" data-k="evening">أذكار المساء</button></div>`+list.map((z,i)=>{const r=left[i]??z.n;return `<div class="card ${r==0?'done':''}"><div class="z">${esc(z.t)}</div><div class="row"><span class="mut">التكرار: ${z.n}</span><button class="b ${r==0?'g':''}" data-i="${i}">${r==0?'تم ✓':'المتبقي '+r}</button></div></div>`}).join('');
+  el.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>azkar(el,b.dataset.k));
+  el.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{const i=b.dataset.i,r=left[i]??list[i].n;if(r>0){left[i]=r-1;sv(k,left);azkar(el,kind)}});
+}
+
+/* ---------- المهام ---------- */
+function tasks(el){
+  const L=ls('tasks',[]);
+  el.innerHTML=`<h2>مهامي</h2><div class="row card soft"><input id="ti" placeholder="اكتب مهمة جديدة…"><button class="b" id="ad">إضافة</button></div>`+(L.length?L.map((t,i)=>`<div class="card chk"><input type="checkbox" data-d="${i}" ${t.d?'checked':''}><span class="${t.d?'cut':''}">${esc(t.t)}</span><button class="x" data-x="${i}">✕</button></div>`).join(''):'<p class="mut">لا توجد مهام بعد. أضف أول مهمة من الأعلى.</p>');
+  const add=()=>{const v=$('#ti').value.trim();if(v){L.unshift({t:v,d:0});sv('tasks',L);tasks(el)}};
+  $('#ad').onclick=add;$('#ti').onkeydown=e=>e.key==='Enter'&&add();
+  el.querySelectorAll('[data-d]').forEach(c=>c.onchange=()=>{L[c.dataset.d].d=c.checked?1:0;sv('tasks',L);tasks(el)});
+  el.querySelectorAll('[data-x]').forEach(c=>c.onclick=()=>{L.splice(c.dataset.x,1);sv('tasks',L);tasks(el)});
+}
+
+/* ---------- المنافسة ---------- */
+async function board(el,mode='today'){
+  el.innerHTML='<h2>منافسة القراءة</h2><div class="mut">جارٍ التحميل…</div>';
+  try{
+    let rows=(await getDocs(query(collection(db,'users'),orderBy('total','desc'),limit(100)))).docs.map(d=>({id:d.id,...d.data()}));
+    const val=u=>mode==='today'?(u.todayKey===today()?u.today:0):u.total;
+    rows=rows.map(u=>({...u,v:val(u)})).filter(u=>u.v>0).sort((a,b)=>b.v-a.v);
+    el.innerHTML=`<h2>منافسة القراءة</h2>${user?`<div class="card soft">رصيدك: <b>${me.today||0}</b> آية اليوم · <b>${me.total||0}</b> إجمالي</div>`:'<div class="card soft">سجّل دخولك من الأعلى لتدخل المنافسة.</div>'}<div class="tabs"><button class="b ${mode=='today'?'':'g'}" data-m="today">اليوم</button><button class="b ${mode=='all'?'':'g'}" data-m="all">الإجمالي</button></div>`+
+    (rows.length?rows.map((u,i)=>`<div class="card rk ${i==0?'p1':''} ${user&&u.id===user.uid?'me':''}"><i>${i+1}</i><b>${esc(u.name||'مجهول')}</b><span>${u.v} آية</span></div>`).join(''):'<p class="mut">لا توجد قراءات بعد. كن أول من يقرأ اليوم!</p>');
+    el.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>board(el,b.dataset.m));
+  }catch{el.innerHTML='<div class="card">تعذّر تحميل الترتيب. تأكد من إعدادات Firestore.</div>'}
+}
+
+/* ---------- لوحة التحكم ---------- */
+async function admin(el){
+  if(!isAdmin()){el.innerHTML='<div class="card">هذه الصفحة للمشرف فقط.</div>';return}
+  const us=(await getDocs(query(collection(db,'users'),orderBy('total','desc'),limit(200)))).docs;
+  el.innerHTML=`<h2>لوحة التحكم</h2>
+  <div class="card"><b>إعلان يظهر للجميع</b><div class="row" style="margin-top:8px"><input id="an" value="${esc(cfg.announcement||'')}" placeholder="اتركه فارغًا لإخفائه"><button class="b" id="san">حفظ</button></div></div>
+  <div class="card"><b>الأذكار (JSON: morning / evening)</b><p class="mut">كل ذكر: {"t":"النص","n":العدد}. اتركه فارغًا للعودة للأذكار الافتراضية.</p><textarea id="az">${cfg.azkar?esc(JSON.stringify(cfg.azkar,null,1)):''}</textarea><button class="b" id="saz" style="margin-top:8px">حفظ الأذكار</button></div>
+  <div class="card"><div class="row"><b>المشاركون (${us.length})</b><button class="b r" id="rst" style="flex:none">تصفير الكل</button></div>
+  ${us.map(d=>{const u=d.data();return `<div class="pt"><span>${esc(u.name||'مجهول')} — ${u.total||0} آية</span><span><button class="b g" data-z="${d.id}">تصفير</button> <button class="b r" data-del="${d.id}">حذف</button></span></div>`}).join('')}</div>`;
+  $('#san').onclick=async()=>{cfg.announcement=$('#an').value;await setDoc(doc(db,'config','app'),{announcement:cfg.announcement});alert('تم الحفظ')};
+  $('#saz').onclick=async()=>{try{const v=$('#az').value.trim();if(v){const o=JSON.parse(v);await setDoc(doc(db,'config','azkar'),o);cfg.azkar=o}else{await deleteDoc(doc(db,'config','azkar'));cfg.azkar=null}alert('تم الحفظ')}catch{alert('صيغة JSON غير صحيحة')}};
+  el.querySelectorAll('[data-z]').forEach(b=>b.onclick=async()=>{await setDoc(doc(db,'users',b.dataset.z),{total:0,today:0},{merge:true});admin(el)});
+  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(confirm('حذف المشارك؟')){await deleteDoc(doc(db,'users',b.dataset.del));admin(el)}});
+  $('#rst').onclick=async()=>{if(confirm('تصفير رصيد الجميع؟')){for(const d of us)await setDoc(doc(db,'users',d.id),{total:0,today:0},{merge:true});admin(el)}};
+}
+buildNav();drawAuth();route();
+</script>
+</body>
+</html>
